@@ -1,6 +1,12 @@
 import { memo, useEffect, useMemo, useState } from 'react'
 import clsx from 'clsx'
-import type { FontFamily, FontSize, TextAlign, TextStyle } from '@/features/board/types/style'
+import type {
+  FontFamily,
+  FontSize,
+  FontSizePreset,
+  TextAlign,
+  TextStyle,
+} from '@/features/board/types/style'
 
 
 type InlineType =
@@ -86,7 +92,7 @@ const FONT_FAMILY_MAP: Record<FontFamily, string> = {
   informal: '"Shantell Sans", ui-handwriting, cursive',
 }
 
-const FONT_SIZE_MAP: Record<FontSize, number> = {
+const FONT_SIZE_MAP: Record<FontSizePreset, number> = {
   S: 14,
   M: 16,
   L: 24,
@@ -101,7 +107,7 @@ const MIN_RENDER_SCALE = 0.15
 const MAX_RENDER_SCALE = 1.5
 const MAX_RENDER_WIDTH = 2000
 const MAX_RENDER_HEIGHT = 1200
-const LINE_HEIGHT_MAP: Record<FontSize, number> = {
+const LINE_HEIGHT_MAP: Record<FontSizePreset, number> = {
   S: 20,
   M: 24,
   L: 32,
@@ -164,7 +170,8 @@ export const subscribeMarkdownFontEpoch = (listener: (epoch: number) => void) =>
 
 
 // eslint-disable-next-line react-refresh/only-export-components
-export const getMarkdownLineHeightPx = (fontSize: FontSize): number => LINE_HEIGHT_MAP[fontSize]
+export const getMarkdownLineHeightPx = (fontSize: FontSize): number =>
+  typeof fontSize === 'number' ? fontSize * 1.25 : LINE_HEIGHT_MAP[fontSize]
 
 const initFontTracking = () => {
   if (fontTrackingInitialized) return
@@ -431,11 +438,11 @@ const getFontFamily = (type: InlineType, fontFamily: FontFamily): string => {
  * Resolves pixel font size for renderer layout and drawing.
  */
 const getFontSizePx = (fontSize: FontSize): number =>
-  FONT_SIZE_MAP[fontSize]
+  typeof fontSize === 'number' ? fontSize : FONT_SIZE_MAP[fontSize]
 
 
 const getLineHeightPx = (fontSize: FontSize): number =>
-  LINE_HEIGHT_MAP[fontSize]
+  typeof fontSize === 'number' ? fontSize * 1.25 : LINE_HEIGHT_MAP[fontSize]
 
 
 /**

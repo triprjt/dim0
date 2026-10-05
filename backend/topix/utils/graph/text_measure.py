@@ -71,6 +71,17 @@ _INLINE_SUB = re.compile(
 _WS_SPLIT = re.compile(r"(\s+)")
 
 
+def _font_metrics(font_size: FontSize | str | float) -> tuple[float, float]:
+    """Resolve a preset or an explicit CSS-pixel font size."""
+    if isinstance(font_size, (int, float)):
+        size = max(1.0, float(font_size))
+        return size, size * 1.25
+    key = font_size.value if isinstance(font_size, FontSize) else str(font_size)
+    return _FONT_SIZE_PX.get(key, _FONT_SIZE_PX["M"]), _LINE_HEIGHT_PX.get(
+        key, _LINE_HEIGHT_PX["M"]
+    )
+
+
 def _display_text(line: str) -> str:
     """Strip inline emphasis markers, keeping the text that renders."""
 
@@ -177,7 +188,7 @@ def _iter_segments(text: str):
 def estimate_markdown_height(
     content: str | None,
     width: float,
-    font_size: FontSize | str = FontSize.M,
+    font_size: FontSize | str | float = FontSize.M,
 ) -> float:
     """Estimate the px height `content` renders to when wrapped at `width`.
 
@@ -191,9 +202,8 @@ def estimate_markdown_height(
     if len(text) > MAX_MEASURE_CHARS:
         text = text[:MAX_MEASURE_CHARS]
 
-    key = font_size.value if isinstance(font_size, FontSize) else str(font_size)
-    line_height = _LINE_HEIGHT_PX.get(key, _LINE_HEIGHT_PX["M"])
-    char_w = _FONT_SIZE_PX.get(key, _FONT_SIZE_PX["M"]) * CHAR_WIDTH_FACTOR
+    font_size_px, line_height = _font_metrics(font_size)
+    char_w = font_size_px * CHAR_WIDTH_FACTOR
     max_width = max(MIN_WIDTH, ceil(width))
 
     total = 0.0
@@ -256,7 +266,7 @@ def estimate_node_height(
     node_type: NodeType,
     width: float,
     content: str | None,
-    font_size: FontSize | str = FontSize.M,
+    font_size: FontSize | str | float = FontSize.M,
 ) -> float:
     """Estimate the bounding-box height a node needs to fit `content` at `width`.
 
@@ -308,7 +318,7 @@ def estimate_node_size(
     node_type: NodeType,
     default_width: float,
     content: str | None,
-    font_size: FontSize | str = FontSize.M,
+    font_size: FontSize | str | float = FontSize.M,
 ) -> tuple[float, float] | None:
     """Fit a node's (width, height) to its content, shape-aware.
 
@@ -325,8 +335,8 @@ def estimate_node_size(
     if node_type in _FIXED_WIDTH_TYPES:
         width = default_width
     else:
-        key = font_size.value if isinstance(font_size, FontSize) else str(font_size)
-        char_w = _FONT_SIZE_PX.get(key, _FONT_SIZE_PX["M"]) * CHAR_WIDTH_FACTOR
+        font_size_px, _ = _font_metrics(font_size)
+        char_w = font_size_px * CHAR_WIDTH_FACTOR
         width_factor = _SHAPE_FACTORS.get(node_type, (1.0, 1.0))[0]
         box_width = (_natural_text_width(text, char_w) + HORIZONTAL_PADDING) / width_factor
         lower = min(MIN_NODE_WIDTH, default_width)

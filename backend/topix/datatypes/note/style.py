@@ -116,7 +116,7 @@ class Style(BaseModel):
     roundness: float = 0.0
     opacity: float = 100
     group_ids: list[str] = []
-    font_size: FontSize = FontSize.M
+    font_size: FontSize | float = FontSize.M
     font_family: FontFamily = FontFamily.HANDWRITING
     text_align: TextAlign = TextAlign.CENTER
     text_color: str = "#000000"
@@ -156,7 +156,7 @@ class LinkStyle(Style):
     opacity: float = 100
     group_ids: list[str] = []
     font_family: FontFamily = FontFamily.HANDWRITING
-    font_size: FontSize = FontSize.M
+    font_size: FontSize | float = FontSize.M
     text_align: TextAlign = TextAlign.CENTER
     text_color: str = "#000000"
     text_style: str | None = "normal"

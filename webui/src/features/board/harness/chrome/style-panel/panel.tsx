@@ -1,6 +1,8 @@
 import { type ReactElement, useMemo } from "react"
+import { getFontSizePx } from "@canvas-harness/core"
 import type { Arrowhead, PathStyle, Style as CanvasStyle } from "@canvas-harness/core"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -14,7 +16,7 @@ import { darkModeDisplayHex } from "@/features/board/lib/colors/dark-variants"
 import { SloppyPresets, StrokeWidthPresets, TRANSPARENT_HEX } from "@/features/board/types/style"
 import type {
   FontFamily,
-  FontSize,
+  FontSizePreset,
   StrokeStyle,
   TextAlign,
 } from "@/features/board/types/style"
@@ -464,22 +466,41 @@ export function StylePanel({
     ),
     fontSize: (
       <Section title="Font size">
-        <ToggleGroup
-          type="single"
-          value={s.fontSize ?? "M"}
-          onValueChange={(v) => v && onStyleChange({ fontSize: v as FontSize })}
-          className="flex gap-2"
-        >
-          {(["S", "M", "L", "XL"] as FontSize[]).map((size) => (
-            <ToggleGroupItem
-              key={size}
-              value={size}
-              className="h-9 w-9 items-center justify-center rounded-md border bg-muted data-[state=on]:bg-secondary-foreground/10 data-[state=on]:text-secondary-foreground"
-            >
-              {size}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
+        <div className="flex flex-wrap items-center gap-2">
+          <ToggleGroup
+            type="single"
+            value={typeof s.fontSize === "string" ? s.fontSize : ""}
+            onValueChange={(v) => v && onStyleChange({ fontSize: v as FontSizePreset })}
+            className="flex gap-2"
+          >
+            {(["S", "M", "L", "XL"] as FontSizePreset[]).map((size) => (
+              <ToggleGroupItem
+                key={size}
+                value={size}
+                className="h-9 w-9 items-center justify-center rounded-md border bg-muted data-[state=on]:bg-secondary-foreground/10 data-[state=on]:text-secondary-foreground"
+              >
+                {size}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+          <div className="flex items-center gap-1">
+            <Input
+              type="number"
+              min={1}
+              step={1}
+              value={Math.round(getFontSizePx(s.fontSize ?? "M"))}
+              onChange={(event) => {
+                const next = Number(event.target.value)
+                if (Number.isFinite(next) && next >= 1) {
+                  onStyleChange({ fontSize: next })
+                }
+              }}
+              aria-label="Custom font size in pixels"
+              className="h-9 w-20"
+            />
+            <span className="text-xs text-muted-foreground">px</span>
+          </div>
+        </div>
       </Section>
     ),
     pathStyle: (

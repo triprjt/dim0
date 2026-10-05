@@ -56,6 +56,11 @@ def test_larger_font_is_taller():
     assert large > small
 
 
+def test_numeric_font_size_is_supported():
+    """An explicit pixel size is measured proportionally, beyond XL."""
+    assert estimate_markdown_height("hello", 300, 72) == 90 + CONTENT_HEIGHT_BUFFER
+
+
 def test_inline_markers_do_not_inflate_height():
     """Emphasis markers are stripped before measuring, so they don't add lines."""
     plain = estimate_markdown_height("bold and code and link", 300)

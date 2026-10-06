@@ -19,13 +19,18 @@ from __future__ import annotations
 
 import re
 
-from math import ceil
+from math import ceil, isfinite
 
 from topix.datatypes.note.style import FontSize, NodeType
 
 # Mirror text/defaults.ts. Font size and line height in CSS px per FontSize.
 _FONT_SIZE_PX: dict[str, int] = {"S": 14, "M": 16, "L": 24, "XL": 36}
 _LINE_HEIGHT_PX: dict[str, int] = {"S": 20, "M": 24, "L": 32, "XL": 40}
+
+# Keep these aligned with @canvas-harness/core's exported font-size constants.
+MIN_FONT_SIZE_PX = 8.0
+MAX_FONT_SIZE_PX = 256.0
+NUMERIC_LINE_HEIGHT_RATIO = 1.25
 
 # Average glyph advance as a fraction of font size. Matches the canvas's own
 # SSR / no-context fallback in `text/measure.ts` (`length * fontSize * 0.55`).
@@ -72,10 +77,16 @@ _WS_SPLIT = re.compile(r"(\s+)")
 
 
 def _font_metrics(font_size: FontSize | str | float) -> tuple[float, float]:
-    """Resolve a preset or an explicit CSS-pixel font size."""
+    """Resolve a preset or a bounded explicit CSS-pixel font size."""
     if isinstance(font_size, (int, float)):
-        size = max(1.0, float(font_size))
-        return size, size * 1.25
+        raw_size = float(font_size)
+        if not isfinite(raw_size):
+            return _FONT_SIZE_PX["M"], _LINE_HEIGHT_PX["M"]
+        size = min(MAX_FONT_SIZE_PX, max(MIN_FONT_SIZE_PX, raw_size))
+        for preset, preset_size in _FONT_SIZE_PX.items():
+            if size == preset_size:
+                return size, _LINE_HEIGHT_PX[preset]
+        return size, size * NUMERIC_LINE_HEIGHT_RATIO
     key = font_size.value if isinstance(font_size, FontSize) else str(font_size)
     return _FONT_SIZE_PX.get(key, _FONT_SIZE_PX["M"]), _LINE_HEIGHT_PX.get(
         key, _LINE_HEIGHT_PX["M"]

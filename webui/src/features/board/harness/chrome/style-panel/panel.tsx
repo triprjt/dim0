@@ -1,8 +1,6 @@
 import { type ReactElement, useMemo } from "react"
-import { getFontSizePx } from "@canvas-harness/core"
 import type { Arrowhead, PathStyle, Style as CanvasStyle } from "@canvas-harness/core"
 import { Label } from "@/components/ui/label"
-import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
@@ -24,6 +22,7 @@ import { cn } from "@/lib/utils"
 import { ColorGrid } from "./color-panel"
 import { ARROWHEAD_OPTIONS, PATH_STYLE_OPTIONS } from "./edge-glyph-options"
 import { ArrowheadGlyph, PathStyleGlyph } from "./edge-glyphs"
+import { FontSizeInput } from "./font-size-input"
 
 
 // canvas-harness's Style augmented with edge-only fields (arrowheads,
@@ -483,23 +482,10 @@ export function StylePanel({
               </ToggleGroupItem>
             ))}
           </ToggleGroup>
-          <div className="flex items-center gap-1">
-            <Input
-              type="number"
-              min={1}
-              step={1}
-              value={Math.round(getFontSizePx(s.fontSize ?? "M"))}
-              onChange={(event) => {
-                const next = Number(event.target.value)
-                if (Number.isFinite(next) && next >= 1) {
-                  onStyleChange({ fontSize: next })
-                }
-              }}
-              aria-label="Custom font size in pixels"
-              className="h-9 w-20"
-            />
-            <span className="text-xs text-muted-foreground">px</span>
-          </div>
+          <FontSizeInput
+            fontSize={s.fontSize ?? "M"}
+            onCommit={(fontSize) => onStyleChange({ fontSize })}
+          />
         </div>
       </Section>
     ),

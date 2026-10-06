@@ -53,7 +53,7 @@ export type FontSizePreset = "S" | "M" | "L" | "XL"
 /** A preset token or an explicit CSS-pixel size. */
 export type FontSize = FontSizePreset | number
 
-// Convert font size to Tailwind CSS class
+/** Return the legacy Tailwind class for a preset; harness renders numeric sizes inline. */
 export function fontSizeToTwClass(size?: FontSize): string {
   if (typeof size === "number") return ""
   switch (size) {
